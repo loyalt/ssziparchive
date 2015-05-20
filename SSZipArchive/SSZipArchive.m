@@ -239,9 +239,25 @@
 	            FILE *fp = fopen((const char*)[fullPath UTF8String], "wb");
 	            while (fp) {
 	                int readBytes = unzReadCurrentFile(zip, buffer, 4096);
-
 	                if (readBytes > 0) {
-	                    fwrite(buffer, readBytes, 1, fp );
+	                    size_t writtenBytes = fwrite(buffer, readBytes, 1, fp );
+                        if (writtenBytes != readBytes) {
+                            // Disk is full or otherwise unable to write correctly
+                            fclose(fp);
+                            NSDictionary *userInfo = @{
+                                                       NSLocalizedDescriptionKey: @"failed to write to file"
+                                                       };
+                            NSError *err = [NSError errorWithDomain:@"SSZipArchiveErrorDomain" code:-3 userInfo:userInfo];
+                            if (error)
+                            {
+                                // ARC doesn't agree with this inside of the autorelease pool
+                            }
+                            if (completionHandler)
+                            {
+                                completionHandler(nil, NO, err);
+                            }
+                            return NO;
+                        }
 	                } else {
 	                    break;
 	                }
