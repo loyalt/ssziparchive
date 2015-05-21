@@ -240,8 +240,8 @@
 	            while (fp) {
 	                int readBytes = unzReadCurrentFile(zip, buffer, 4096);
 	                if (readBytes > 0) {
-	                    size_t writtenBytes = fwrite(buffer, readBytes, 1, fp );
-                        if (writtenBytes != readBytes) {
+	                    size_t writtenItems = fwrite(buffer, readBytes, 1, fp);
+                        if (1 != writtenItems) {
                             // Disk is full or otherwise unable to write correctly
                             fclose(fp);
                             NSDictionary *userInfo = @{
